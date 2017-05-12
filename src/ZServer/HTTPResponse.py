@@ -208,7 +208,7 @@ class ZServerHTTPResponse(HTTPResponse):
             finally:
                 self._templock.release()
 
-            if e > _tempfile_max_size:
+            if e > self._tempfile_max_size:
                 self._tempstart = 0
                 self._tempfile = tempfile.TemporaryFile()
                 stdout.write(file_part_producer(t,self._templock,b,e,close_after_more=True), l)
