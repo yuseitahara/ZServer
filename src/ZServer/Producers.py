@@ -52,11 +52,12 @@ class file_part_producer:
     # match http_channel's outgoing buffer size
     out_buffer_size = 1<<16
 
-    def __init__(self, file, lock, start, end):
+    def __init__(self, file, lock, start, end, close_after_more=False):
         self.file=file
         self.lock=lock
         self.start=start
         self.end=end
+        self.close_after_more=close_after_more
 
     def more(self):
         end=self.end
@@ -83,6 +84,8 @@ class file_part_producer:
                 return data
 
         self.end=0
+        if self.close_after_more:
+            self.file.close()
         del self.file
 
         return data

@@ -148,6 +148,8 @@ class ZServerHTTPResponse(HTTPResponse):
     _templock = None
     _tempstart = 0
 
+    _tempfile_max_size = 1024 ** 3
+
     def write(self,data):
         """\
         Return data as a stream
@@ -205,8 +207,14 @@ class ZServerHTTPResponse(HTTPResponse):
                 t.write(data)
             finally:
                 self._templock.release()
-            self._tempstart = e
-            stdout.write(file_part_producer(t,self._templock,b,e), l)
+
+            if e > _tempfile_max_size:
+                self._tempstart = 0
+                self._tempfile = tempfile.TemporaryFile()
+                stdout.write(file_part_producer(t,self._templock,b,e,close_after_more=True), l)
+            else:
+                self._tempstart = e
+                stdout.write(file_part_producer(t,self._templock,b,e), l)
 
     _retried_response = None
 
